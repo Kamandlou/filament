@@ -8,9 +8,21 @@ return [
             'more' => 'và còn :count',
         ],
 
+        'messages' => [
+            'copied' => 'Đã sao chép',
+        ],
+
     ],
 
     'fields' => [
+
+        'bulk_select_page' => [
+            'label' => 'Chọn/bỏ chọn tất cả các mục cho tác vụ hàng loạt.',
+        ],
+
+        'bulk_select_record' => [
+            'label' => 'Chọn/bỏ chọn mục :key cho các tác vụ hàng loạt.',
+        ],
 
         'search_query' => [
             'label' => 'Tìm kiếm',
@@ -28,7 +40,13 @@ return [
         'fields' => [
 
             'records_per_page' => [
+
                 'label' => 'mỗi trang',
+
+                'options' => [
+                    'all' => 'Tất cả',
+                ],
+
             ],
 
         ],
@@ -76,16 +94,34 @@ return [
     ],
 
     'empty' => [
+
         'heading' => 'Không có dữ liệu nào',
+
+        'buttons' => [
+
+            'reset_column_searches' => [
+                'label' => 'Xóa tìm kiếm cột',
+            ],
+
+        ],
+
     ],
 
     'filters' => [
 
         'buttons' => [
 
+            'remove' => [
+                'label' => 'Xóa bộ lọc',
+            ],
+
+            'remove_all' => [
+                'label' => 'Xóa toàn bộ bộ lọc',
+                'tooltip' => 'Xóa toàn bộ bộ lọc',
+            ],
+
             'reset' => [
                 'label' => 'Đặt lại bộ lọc',
-                'tooltip' => 'Đặt lại bộ lọc',
             ],
 
         ],
@@ -128,6 +164,29 @@ return [
 
             'deselect_all' => [
                 'label' => 'Bỏ chọn tất cả',
+            ],
+
+        ],
+
+    ],
+
+    'sorting' => [
+
+        'fields' => [
+
+            'column' => [
+                'label' => 'Sắp xếp theo',
+            ],
+
+            'direction' => [
+
+                'label' => 'Thứ tự sắp xếp',
+
+                'options' => [
+                    'asc' => 'Tăng dần',
+                    'desc' => 'Giảm dần',
+                ],
+
             ],
 
         ],

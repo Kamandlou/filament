@@ -81,6 +81,8 @@ BulkAction::make('delete')
     ->action(fn (Collection $records) => $records->each->delete())
 ```
 
+> Please note that Filament uses the parameter name `$records` in the function to inject the collection. Any other parameter name will resolve from the container instead.
+
 You may deselect the records after a bulk action has been executed using the `deselectRecordsAfterCompletion()` method:
 
 ```php
@@ -128,6 +130,31 @@ BulkAction::make('delete')
     ->action(fn (Collection $records) => $records->each->delete())
     ->deselectRecordsAfterCompletion()
     ->color('danger')
+```
+
+## Disabling record bulk actions
+
+You may conditionally disable bulk actions for a specific record:
+
+```php
+use Closure;
+use Illuminate\Database\Eloquent\Model;
+
+public function isTableRecordSelectable(): ?Closure
+{
+    return fn (Model $record): bool => $record->status === Status::Enabled;
+}
+```
+
+## Setting a size
+
+The default size for table actions is `sm` but you may also change it to either `md` or `lg`:
+
+```php
+use Filament\Tables\Actions\Action;
+
+Action::make('delete')
+    ->size('lg')
 ```
 
 ## Setting an icon
@@ -297,6 +324,16 @@ BulkAction::make('advance')
     ->modalContent(view('filament.resources.event.actions.advance'))
 ```
 
+By default, the custom content is displayed above the modal form if there is one, but you can add content below using `modalFooter()` if you wish:
+
+```php
+use Filament\Pages\Actions\BulkAction;
+
+BulkAction::make('advance')
+    ->action(fn () => $this->record->advance())
+    ->modalFooter(view('filament.resources.event.actions.advance'))
+```
+
 ## Authorization
 
 You may conditionally show or hide actions and bulk actions for certain users using either the `visible()` or `hidden()` methods, passing a closure:
@@ -409,7 +446,7 @@ protected function getTableActionsPosition(): ?string
 
 Row actions are aligned to the right in their cell by default. To change the alignment, update the configuration value inside of the package config:
 
-```
+```php
 'actions' => [
     'cell' => [
         'alignment' => 'right', // `right`, `left` or `center`

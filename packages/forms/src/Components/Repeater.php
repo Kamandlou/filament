@@ -6,17 +6,19 @@ use Closure;
 use function Filament\Forms\array_move_after;
 use function Filament\Forms\array_move_before;
 use Filament\Forms\Contracts\HasForms;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 use Illuminate\Support\Str;
 
-class Repeater extends Field
+class Repeater extends Field implements Contracts\CanConcealComponents
 {
     use Concerns\CanBeCollapsed;
     use Concerns\CanLimitItemsLength;
     use Concerns\HasContainerGridLayout;
+    use Concerns\CanBeCloned;
 
     protected string $view = 'forms::components.repeater';
 
@@ -28,9 +30,9 @@ class Repeater extends Field
 
     protected bool | Closure $isItemMovementDisabled = false;
 
-    protected bool | Closure $isInset = false;
+    protected bool | Closure $isReorderableWithButtons = false;
 
-    protected bool | Closure $isCloneable = false;
+    protected bool | Closure $isInset = false;
 
     protected ?Collection $cachedExistingRecords = null;
 
@@ -216,16 +218,16 @@ class Repeater extends Field
         return $this;
     }
 
-    public function cloneable(bool | Closure $condition = true): static
+    public function disableItemMovement(bool | Closure $condition = true): static
     {
-        $this->isCloneable = $condition;
+        $this->isItemMovementDisabled = $condition;
 
         return $this;
     }
 
-    public function disableItemMovement(bool | Closure $condition = true): static
+    public function reorderableWithButtons(bool | Closure $condition = true): static
     {
-        $this->isItemMovementDisabled = $condition;
+        $this->isReorderableWithButtons = $condition;
 
         return $this;
     }
@@ -248,10 +250,10 @@ class Repeater extends Field
         foreach ($this->getState() ?? [] as $itemKey => $itemData) {
             $containers[$itemKey] = $this
                 ->getChildComponentContainer()
-                ->getClone()
                 ->statePath($itemKey)
                 ->model($relationship ? $records[$itemKey] ?? $this->getRelatedModel() : null)
-                ->inlineLabel(false);
+                ->inlineLabel(false)
+                ->getClone();
         }
 
         return $containers;
@@ -260,6 +262,11 @@ class Repeater extends Field
     public function getCreateItemButtonLabel(): string
     {
         return $this->evaluate($this->createItemButtonLabel);
+    }
+
+    public function isReorderableWithButtons(): bool
+    {
+        return $this->evaluate($this->isReorderableWithButtons) && (! $this->isItemMovementDisabled());
     }
 
     public function isItemMovementDisabled(): bool
@@ -275,11 +282,6 @@ class Repeater extends Field
     public function isItemDeletionDisabled(): bool
     {
         return $this->evaluate($this->isItemDeletionDisabled) || $this->isDisabled();
-    }
-
-    public function isCloneable(): bool
-    {
-        return $this->evaluate($this->isCloneable) && (! $this->isDisabled());
     }
 
     public function isInset(): bool
@@ -351,7 +353,7 @@ class Repeater extends Field
                 if ($record = ($existingRecords[$itemKey] ?? null)) {
                     $activeLocale && method_exists($record, 'setLocale') && $record->setLocale($activeLocale);
 
-                    $itemData = $component->mutateRelationshipDataBeforeSave($itemData);
+                    $itemData = $component->mutateRelationshipDataBeforeSave($itemData, record: $record);
 
                     $record->fill($itemData)->save();
 
@@ -419,14 +421,16 @@ class Repeater extends Field
             ->toArray();
     }
 
-    public function getLabel(): string
+    public function getLabel(): string | Htmlable | null
     {
         if ($this->label === null && $this->hasRelationship()) {
-            return (string) Str::of($this->getRelationshipName())
+            $label = (string) Str::of($this->getRelationshipName())
                 ->before('.')
                 ->kebab()
                 ->replace(['-', '_'], ' ')
                 ->ucfirst();
+
+            return ($this->shouldTranslateLabel) ? __($label) : $label;
         }
 
         return parent::getLabel();
@@ -460,6 +464,13 @@ class Repeater extends Field
         $relationship = $this->getRelationship();
         $relationshipQuery = $relationship->getQuery();
 
+        if ($relationship instanceof BelongsToMany) {
+            $relationshipQuery->select([
+                $relationship->getTable() . '.*',
+                $relationshipQuery->getModel()->getTable() . '.*',
+            ]);
+        }
+
         if ($this->modifyRelationshipQueryUsing) {
             $relationshipQuery = $this->evaluate($this->modifyRelationshipQueryUsing, [
                 'query' => $relationshipQuery,
@@ -477,10 +488,11 @@ class Repeater extends Field
         );
     }
 
-    public function getItemLabel(string $uuid): ?string
+    public function getItemLabel(string $uuid): string | Htmlable | null
     {
         return $this->evaluate($this->itemLabel, [
             'state' => $this->getChildComponentContainer($uuid)->getRawState(),
+            'uuid' => $uuid,
         ]);
     }
 
@@ -547,14 +559,20 @@ class Repeater extends Field
         return $this;
     }
 
-    public function mutateRelationshipDataBeforeSave(array $data): array
+    public function mutateRelationshipDataBeforeSave(array $data, Model $record): array
     {
         if ($this->mutateRelationshipDataBeforeSaveUsing instanceof Closure) {
             $data = $this->evaluate($this->mutateRelationshipDataBeforeSaveUsing, [
                 'data' => $data,
+                'record' => $record,
             ]);
         }
 
         return $data;
+    }
+
+    public function canConcealComponents(): bool
+    {
+        return $this->isCollapsible();
     }
 }

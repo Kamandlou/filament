@@ -2,6 +2,7 @@
     'color' => 'primary',
     'darkMode' => false,
     'disabled' => false,
+    'form' => null,
     'icon' => null,
     'keyBindings' => null,
     'indicator' => null,
@@ -14,23 +15,25 @@
 
 @php
     $buttonClasses = [
-        'filament-icon-button flex items-center justify-center rounded-full hover:bg-gray-500/5 focus:outline-none',
+        'filament-icon-button relative flex items-center justify-center rounded-full outline-none hover:bg-gray-500/5 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-70',
         'text-primary-500 focus:bg-primary-500/10' => $color === 'primary',
         'text-danger-500 focus:bg-danger-500/10' => $color === 'danger',
         'text-gray-500 focus:bg-gray-500/10' => $color === 'secondary',
+        'dark:text-gray-400' => $color === 'secondary' && $darkMode,
         'text-success-500 focus:bg-success-500/10' => $color === 'success',
         'text-warning-500 focus:bg-warning-500/10' => $color === 'warning',
         'dark:hover:bg-gray-300/5' => $darkMode,
-        'opacity-70 cursor-not-allowed pointer-events-none' => $disabled,
-        'w-10 h-10' => $size === 'md',
-        'w-8 h-8' => $size === 'sm',
-        'w-12 h-12' => $size === 'lg',
+        'h-10 w-10' => $size === 'md',
+        'h-8 w-8' => $size === 'sm',
+        'h-8 w-8 md:h-10 md:w-10' => $size === 'sm md:md',
+        'h-12 w-12' => $size === 'lg',
     ];
 
     $iconClasses = \Illuminate\Support\Arr::toCssClasses([
         'filament-icon-button-icon',
         'w-5 h-5' => $size === 'md',
         'w-4 h-4' => $size === 'sm',
+        'w-4 h-4 md:w-5 md:h-5' => $size === 'sm md:md',
         'w-6 h-6' => $size === 'lg',
     ]);
 
@@ -42,6 +45,14 @@
         'bg-success-500/10' => $color === 'success',
         'bg-warning-500/10' => $color === 'warning',
     ]);
+
+    $wireTarget = $attributes->whereStartsWith(['wire:target', 'wire:click'])->first();
+
+    $hasLoadingIndicator = filled($wireTarget) || ($type === 'submit' && filled($form));
+
+    if ($hasLoadingIndicator) {
+        $loadingIndicatorTarget = html_entity_decode($wireTarget ?: $form, ENT_QUOTES);
+    }
 @endphp
 
 @if ($tag === 'button')
@@ -68,7 +79,21 @@
             </span>
         @endif
 
-        <x-dynamic-component :component="$icon" :class="$iconClasses" />
+        <x-dynamic-component
+            :component="$icon"
+            :wire:loading.remove.delay="$hasLoadingIndicator"
+            :wire:target="$hasLoadingIndicator ? $loadingIndicatorTarget : false"
+            :class="$iconClasses"
+        />
+
+        @if ($hasLoadingIndicator)
+            <x-filament-support::loading-indicator
+                x-cloak
+                wire:loading.delay
+                :wire:target="$loadingIndicatorTarget"
+                :class="$iconClasses"
+            />
+        @endif
 
         @if ($indicator)
             <span class="{{ $indicatorClasses }}">

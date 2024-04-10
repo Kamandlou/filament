@@ -16,6 +16,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Vite;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
@@ -55,6 +56,8 @@ class FilamentManager
     protected ?Closure $navigationBuilder = null;
 
     protected array $renderHooks = [];
+
+    protected bool $isServing = false;
 
     public function auth(): Guard
     {
@@ -145,6 +148,11 @@ class FilamentManager
         $this->theme = $theme;
     }
 
+    public function registerViteTheme(string | array $theme, ?string $buildDirectory = null): void
+    {
+        $this->theme = app(Vite::class)($theme, $buildDirectory);
+    }
+
     public function registerUserMenuItems(array $items): void
     {
         $this->userMenuItems = array_merge($this->userMenuItems, $items);
@@ -160,13 +168,18 @@ class FilamentManager
         $this->meta = array_merge($this->meta, $meta);
     }
 
+    public function setServingStatus(bool $condition = true): void
+    {
+        $this->isServing = $condition;
+    }
+
     public function serving(Closure $callback): void
     {
         Event::listen(ServingFilament::class, $callback);
     }
 
     /**
-     * @deprecated Use \Filament\Notifications\Notification::send() instead.
+     * @deprecated Use `\Filament\Notifications\Notification::send()` instead.
      */
     public function notify(string $status, string $message, bool $isAfterRedirect = false): void
     {
@@ -406,5 +419,10 @@ class FilamentManager
     public function getMeta(): array
     {
         return array_unique($this->meta);
+    }
+
+    public function isServing(): bool
+    {
+        return $this->isServing;
     }
 }

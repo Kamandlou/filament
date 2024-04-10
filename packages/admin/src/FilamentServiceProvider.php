@@ -5,6 +5,7 @@ namespace Filament;
 use Filament\Facades\Filament;
 use Filament\Http\Livewire\Auth\Login;
 use Filament\Http\Livewire\GlobalSearch;
+use Filament\Http\Livewire\Notifications;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Http\Middleware\MirrorConfigToSubpackages;
@@ -19,7 +20,6 @@ use Filament\Tables\Actions\Action as TableAction;
 use Filament\Tables\Actions\ButtonAction;
 use Filament\Tables\Actions\IconButtonAction;
 use Filament\Testing\TestsPageActions;
-use Filament\Testing\TestsPages;
 use Filament\Widgets\Widget;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
@@ -102,8 +102,19 @@ class FilamentServiceProvider extends PluginServiceProvider
 
         $this->bootTableActionConfiguration();
 
+        if ($this->app->runningInConsole()) {
+            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
+                $this->publishes([
+                    $file->getRealPath() => base_path("stubs/filament/{$file->getFilename()}"),
+                ], 'filament-stubs');
+            }
+        }
+
+        Filament::serving(function () {
+            Filament::setServingStatus();
+        });
+
         TestableLivewire::mixin(new TestsPageActions());
-        TestableLivewire::mixin(new TestsPages());
     }
 
     protected function registerComponents(): void
@@ -225,6 +236,10 @@ class FilamentServiceProvider extends PluginServiceProvider
                             ->replace(['/'], ['\\']),
                     ) : null;
 
+                    if (is_string($variableNamespace)) {
+                        $variableNamespace = (string) Str::of($variableNamespace)->before('\\');
+                    }
+
                     return (string) $namespace
                         ->append('\\', $file->getRelativePathname())
                         ->replace('*', $variableNamespace)
@@ -246,6 +261,7 @@ class FilamentServiceProvider extends PluginServiceProvider
         foreach (array_merge($this->livewireComponents, [
             'filament.core.auth.login' => Login::class,
             'filament.core.global-search' => GlobalSearch::class,
+            'filament.core.notifications' => Notifications::class,
         ]) as $alias => $class) {
             Livewire::component($alias, $class);
         }

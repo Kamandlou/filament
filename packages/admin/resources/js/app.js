@@ -17,9 +17,9 @@ Alpine.plugin(Persist)
 Alpine.plugin(Tooltip)
 
 Alpine.store('sidebar', {
-    isOpen: Alpine.$persist(false).as('isOpen'),
+    isOpen: Alpine.$persist(true).as('isOpen'),
 
-    collapsedGroups: Alpine.$persist([]).as('collapsedGroups'),
+    collapsedGroups: Alpine.$persist(null).as('collapsedGroups'),
 
     groupIsCollapsed: function (group) {
         return this.collapsedGroups.includes(group)

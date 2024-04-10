@@ -5,12 +5,24 @@ return [
     'columns' => [
 
         'tags' => [
-            'more' => 'en nog :count',
+            'more' => 'en :count meer',
+        ],
+
+        'messages' => [
+            'copied' => 'Gekopieerd',
         ],
 
     ],
 
     'fields' => [
+
+        'bulk_select_page' => [
+            'label' => 'Alle items selecteren/deselecteren voor bulkacties.',
+        ],
+
+        'bulk_select_record' => [
+            'label' => 'Item :key selecteren/deselecteren voor bulkacties.',
+        ],
 
         'search_query' => [
             'label' => 'Zoeken',
@@ -23,7 +35,7 @@ return [
 
         'label' => 'Paginering navigatie',
 
-        'overview' => 'Toont :first tot :last van :total resultaten',
+        'overview' => '{1} Toont 1 resultaat|[2,*] Toont :first tot :last van :total resultaten',
 
         'fields' => [
 
@@ -82,16 +94,33 @@ return [
     ],
 
     'empty' => [
-        'heading' => 'Geen resultaten gevonden',
+        'heading' => 'Geen records gevonden',
+
+        'buttons' => [
+
+            'reset_column_searches' => [
+                'label' => 'Kolom zoekopdracht wissen',
+            ],
+
+        ],
+
     ],
 
     'filters' => [
 
         'buttons' => [
 
+            'remove' => [
+                'label' => 'Filter verwijderen',
+            ],
+
+            'remove_all' => [
+                'label' => 'Alle filters verwijderen',
+                'tooltip' => 'Alle filters verwijderen',
+            ],
+
             'reset' => [
                 'label' => 'Filters resetten',
-                'tooltip' => 'Filters resetten',
             ],
 
         ],
@@ -134,6 +163,29 @@ return [
 
             'deselect_all' => [
                 'label' => 'Alles deselecteren',
+            ],
+
+        ],
+
+    ],
+
+    'sorting' => [
+
+        'fields' => [
+
+            'column' => [
+                'label' => 'Sorteren op',
+            ],
+
+            'direction' => [
+
+                'label' => 'Sorteerrichting',
+
+                'options' => [
+                    'asc' => 'Oplopend',
+                    'desc' => 'Aflopend',
+                ],
+
             ],
 
         ],

@@ -8,9 +8,21 @@ return [
             'more' => ':count de plus',
         ],
 
+        'messages' => [
+            'copied' => 'Copié',
+        ],
+
     ],
 
     'fields' => [
+
+        'bulk_select_page' => [
+            'label' => 'Sélectionner/déselectionner tous les éléments pour les actions groupées.',
+        ],
+
+        'bulk_select_record' => [
+            'label' => "Sélectionner/désélectionner l'élément :key pour les actions groupées.",
+        ],
 
         'search_query' => [
             'label' => 'Rechercher',
@@ -23,12 +35,17 @@ return [
 
         'label' => 'Navigation par pagination',
 
-        'overview' => 'Affichage de :first à :last sur :total éléments',
+        'overview' => '{1} Affichage de 1 résultat|[2,*] Affichage de :first à :last sur :total résultats',
 
         'fields' => [
 
             'records_per_page' => [
+
                 'label' => 'par page',
+
+                'options' => [
+                    'all' => 'Tous',
+                ],
             ],
 
         ],
@@ -76,16 +93,34 @@ return [
     ],
 
     'empty' => [
+
         'heading' => 'Aucun élément trouvé',
+
+        'buttons' => [
+
+            'reset_column_searches' => [
+                'label' => 'Effacer la recherche de colonne',
+            ],
+
+        ],
+
     ],
 
     'filters' => [
 
         'buttons' => [
 
+            'remove' => [
+                'label' => 'Supprimer le filtre',
+            ],
+
+            'remove_all' => [
+                'label' => 'Supprimer tous les filtres',
+                'tooltip' => 'Supprimer tous les filtres',
+            ],
+
             'reset' => [
-                'label' => 'Réinitialiser',
-                'tooltip' => 'Réinitialiser',
+                'label' => 'Réinitialiser les filtres',
             ],
 
         ],
@@ -114,7 +149,7 @@ return [
 
     ],
 
-    'reorder_indicator' => 'Faites glisser et déposez les enregistrements dans l\'ordre.',
+    'reorder_indicator' => "Faites glisser et déposez les enregistrements dans l'ordre.",
 
     'selection_indicator' => [
 
@@ -128,6 +163,29 @@ return [
 
             'deselect_all' => [
                 'label' => 'Désélectionner tout',
+            ],
+
+        ],
+
+    ],
+
+    'sorting' => [
+
+        'fields' => [
+
+            'column' => [
+                'label' => 'Trier par',
+            ],
+
+            'direction' => [
+
+                'label' => 'Ordre',
+
+                'options' => [
+                    'asc' => 'Croissant',
+                    'desc' => 'Décroissant',
+                ],
+
             ],
 
         ],

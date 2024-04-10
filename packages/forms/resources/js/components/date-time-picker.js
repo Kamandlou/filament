@@ -18,7 +18,6 @@ export default (Alpine) => {
             displayFormat,
             firstDayOfWeek,
             isAutofocused,
-            isDisabled,
             locale,
             shouldCloseOnDateSelection,
             state,
@@ -214,6 +213,12 @@ export default (Alpine) => {
 
                         let date = this.getSelectedDate()
 
+                        if (date === null) {
+                            this.clearState()
+
+                            return
+                        }
+
                         if (
                             this.getMaxDate() !== null &&
                             date?.isAfter(this.getMaxDate())
@@ -251,14 +256,41 @@ export default (Alpine) => {
 
                     this.setState(null)
 
+                    this.hour = 0
+                    this.minute = 0
+                    this.second = 0
+
                     this.$nextTick(() => (this.isClearingState = false))
                 },
 
                 dateIsDisabled: function (date) {
-                    if (this.getMaxDate() && date.isAfter(this.getMaxDate())) {
+                    if (
+                        this.$refs?.disabledDates &&
+                        JSON.parse(this.$refs.disabledDates.value ?? []).some(
+                            (disabledDate) => {
+                                disabledDate = dayjs(disabledDate)
+
+                                if (!disabledDate.isValid()) {
+                                    return false
+                                }
+
+                                return disabledDate.isSame(date, 'day')
+                            },
+                        )
+                    ) {
                         return true
                     }
-                    if (this.getMinDate() && date.isBefore(this.getMinDate())) {
+
+                    if (
+                        this.getMaxDate() &&
+                        date.isAfter(this.getMaxDate(), 'day')
+                    ) {
+                        return true
+                    }
+                    if (
+                        this.getMinDate() &&
+                        date.isBefore(this.getMinDate(), 'day')
+                    ) {
                         return true
                     }
 
@@ -352,6 +384,10 @@ export default (Alpine) => {
                         return null
                     }
 
+                    if (this.state === null) {
+                        return null
+                    }
+
                     let date = dayjs(this.state)
 
                     if (!date.isValid()) {
@@ -362,10 +398,6 @@ export default (Alpine) => {
                 },
 
                 togglePanelVisibility: function () {
-                    if (isDisabled) {
-                        return
-                    }
-
                     if (!this.isOpen()) {
                         this.focusedDate =
                             this.getSelectedDate() ??
@@ -454,7 +486,7 @@ export default (Alpine) => {
                 },
 
                 isOpen: function () {
-                    return this.$refs.panel.style.display === 'block'
+                    return this.$refs.panel?.style.display === 'block'
                 },
             }
         },
@@ -466,19 +498,22 @@ const locales = {
     bs: require('dayjs/locale/bs'),
     ca: require('dayjs/locale/ca'),
     cs: require('dayjs/locale/cs'),
+    cy: require('dayjs/locale/cy'),
     da: require('dayjs/locale/da'),
     de: require('dayjs/locale/de'),
     en: require('dayjs/locale/en'),
     es: require('dayjs/locale/es'),
     fa: require('dayjs/locale/fa'),
+    fi: require('dayjs/locale/fi'),
     fr: require('dayjs/locale/fr'),
     hi: require('dayjs/locale/hi'),
     hu: require('dayjs/locale/hu'),
     hy: require('dayjs/locale/hy-am'),
     id: require('dayjs/locale/id'),
     it: require('dayjs/locale/it'),
-    js: require('dayjs/locale/ja'),
+    ja: require('dayjs/locale/ja'),
     ka: require('dayjs/locale/ka'),
+    km: require('dayjs/locale/km'),
     ku: require('dayjs/locale/ku'),
     ms: require('dayjs/locale/ms'),
     my: require('dayjs/locale/my'),

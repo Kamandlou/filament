@@ -10,10 +10,11 @@ use Filament\Forms\Components\Builder\Block;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
-class Builder extends Field
+class Builder extends Field implements Contracts\CanConcealComponents
 {
     use Concerns\CanBeCollapsed;
     use Concerns\CanLimitItemsLength;
+    use Concerns\CanBeCloned;
 
     protected string $view = 'forms::components.builder';
 
@@ -22,6 +23,8 @@ class Builder extends Field
     protected string | Closure | null $createItemButtonLabel = null;
 
     protected bool | Closure $isItemMovementDisabled = false;
+
+    protected bool | Closure $isReorderableWithButtons = false;
 
     protected bool | Closure $isItemCreationDisabled = false;
 
@@ -107,6 +110,24 @@ class Builder extends Field
                     data_set($livewire, $statePath, $items);
                 },
             ],
+            'builder::cloneItem' => [
+                function (Builder $component, string $statePath, string $uuidToDuplicate): void {
+                    if ($statePath !== $component->getStatePath()) {
+                        return;
+                    }
+
+                    $newUuid = (string) Str::uuid();
+
+                    $livewire = $component->getLivewire();
+                    data_set(
+                        $livewire,
+                        "{$statePath}.{$newUuid}",
+                        data_get($livewire, "{$statePath}.{$uuidToDuplicate}"),
+                    );
+
+                    $component->collapsed(false, shouldMakeComponentCollapsible: false);
+                },
+            ],
             'builder::moveItemDown' => [
                 function (Builder $component, string $statePath, string $uuidToMoveDown): void {
                     if ($component->isItemMovementDisabled()) {
@@ -170,7 +191,7 @@ class Builder extends Field
         });
     }
 
-    public function blocks(array $blocks): static
+    public function blocks(array | Closure $blocks): static
     {
         $this->childComponents($blocks);
 
@@ -215,6 +236,13 @@ class Builder extends Field
     public function inset(bool | Closure $condition = true): static
     {
         $this->isInset = $condition;
+
+        return $this;
+    }
+
+    public function reorderableWithButtons(bool | Closure $condition = true): static
+    {
+        $this->isReorderableWithButtons = $condition;
 
         return $this;
     }
@@ -264,9 +292,9 @@ class Builder extends Field
                 fn (array $itemData, $itemIndex): ComponentContainer => $this
                     ->getBlock($itemData['type'])
                     ->getChildComponentContainer()
-                    ->getClone()
                     ->statePath("{$itemIndex}.data")
-                    ->inlineLabel(false),
+                    ->inlineLabel(false)
+                    ->getClone(),
             )
             ->all();
     }
@@ -284,6 +312,11 @@ class Builder extends Field
     public function hasBlock($name): bool
     {
         return (bool) $this->getBlock($name);
+    }
+
+    public function isReorderableWithButtons(): bool
+    {
+        return $this->evaluate($this->isReorderableWithButtons) && (! $this->isItemMovementDisabled());
     }
 
     public function isItemMovementDisabled(): bool
@@ -314,5 +347,10 @@ class Builder extends Field
     public function isInset(): bool
     {
         return (bool) $this->evaluate($this->isInset);
+    }
+
+    public function canConcealComponents(): bool
+    {
+        return $this->isCollapsible();
     }
 }

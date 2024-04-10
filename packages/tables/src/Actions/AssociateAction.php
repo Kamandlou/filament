@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class AssociateAction extends Action
 {
@@ -27,6 +28,8 @@ class AssociateAction extends Action
     protected bool | Closure $isRecordSelectPreloaded = false;
 
     protected string | Closure | null $recordTitleAttribute = null;
+
+    protected array | Closure | null $recordSelectSearchColumns = null;
 
     public static function getDefaultName(): ?string
     {
@@ -52,7 +55,7 @@ class AssociateAction extends Action
             ];
         });
 
-        $this->successNotificationMessage(__('filament-support::actions/associate.single.messages.associated'));
+        $this->successNotificationTitle(__('filament-support::actions/associate.single.messages.associated'));
 
         $this->color('secondary');
 
@@ -62,7 +65,7 @@ class AssociateAction extends Action
 
         $this->action(function (array $arguments, ComponentContainer $form): void {
             $this->process(function (array $data) {
-                /** @var HasMany $relationship */
+                /** @var HasMany | MorphMany $relationship */
                 $relationship = $this->getRelationship();
 
                 $record = $relationship->getRelated()->query()->find($data['recordId']);
@@ -80,7 +83,7 @@ class AssociateAction extends Action
 
                 $form->fill();
 
-                $this->hold();
+                $this->halt();
 
                 return;
             }
@@ -145,10 +148,22 @@ class AssociateAction extends Action
         return $attribute;
     }
 
+    public function recordSelectSearchColumns(array | Closure | null $columns): static
+    {
+        $this->recordSelectSearchColumns = $columns;
+
+        return $this;
+    }
+
+    public function getRecordSelectSearchColumns(): ?array
+    {
+        return $this->evaluate($this->recordSelectSearchColumns);
+    }
+
     public function getRecordSelect(): Select
     {
         $getOptions = function (?string $search = null, ?array $searchColumns = []): array {
-            /** @var HasMany $relationship */
+            /** @var HasMany | MorphMany $relationship */
             $relationship = $this->getRelationship();
 
             $titleColumnName = $this->getRecordTitleAttribute();
@@ -179,9 +194,8 @@ class AssociateAction extends Action
                     foreach ($searchColumns as $searchColumnName) {
                         $whereClause = $isFirst ? 'where' : 'orWhere';
 
-                        $query->{$whereClause}(
-                            $searchColumnName,
-                            $searchOperator,
+                        $query->{"{$whereClause}Raw"}(
+                            "lower({$searchColumnName}) {$searchOperator} ?",
                             "%{$search}%",
                         );
 
@@ -192,21 +206,24 @@ class AssociateAction extends Action
                 });
             }
 
-            $localKeyName = $relationship->getLocalKeyName();
-
             return $relationshipQuery
                 ->whereDoesntHave($this->getInverseRelationshipName(), function (Builder $query) use ($relationship): Builder {
-                    return $query->where($relationship->getParent()->getQualifiedKeyName(), $relationship->getParent()->getKey());
+                    if ($relationship instanceof MorphMany) {
+                        return $query->where($relationship->getMorphType(), $relationship->getMorphClass())
+                            ->where($relationship->getQualifiedForeignKeyName(), $relationship->getParent()->getKey());
+                    }
+
+                    return $query->where($query->qualifyColumn($relationship->getParent()->getKeyName()), $relationship->getParent()->getKey());
                 })
                 ->get()
-                ->mapWithKeys(fn (Model $record): array => [$record->{$localKeyName} => $this->getRecordTitle($record)])
+                ->mapWithKeys(fn (Model $record): array => [$record->getKey() => $this->getRecordTitle($record)])
                 ->toArray();
         };
 
         $select = Select::make('recordId')
             ->label(__('filament-support::actions/associate.single.modal.fields.record_id.label'))
             ->required()
-            ->searchable()
+            ->searchable($this->getRecordSelectSearchColumns() ?? true)
             ->getSearchResultsUsing(static fn (Select $component, string $search): array => $getOptions(search: $search, searchColumns: $component->getSearchColumns()))
             ->getOptionLabelUsing(fn ($value): string => $this->getRecordTitle($this->getRelationship()->getRelated()->query()->find($value)))
             ->options(fn (): array => $this->isRecordSelectPreloaded() ? $getOptions() : [])

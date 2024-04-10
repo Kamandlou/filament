@@ -13,9 +13,19 @@ namespace Livewire\Testing {
 
         public function callTableAction(string $name, $record = null, array $data = [], array $arguments = []): static {}
 
+        public function callTableColumnAction(string $name, $record = null): static {}
+
         public function callMountedTableAction(array $arguments = []): static {}
 
         public function assertTableActionExists(string $name): static {}
+
+        public function assertTableActionDoesNotExist(string $name): static {}
+
+        public function assertTableActionsExistInOrder(array $names): static {}
+
+        public function assertTableHeaderActionsExistInOrder(array $names): static {}
+
+        public function assertTableEmptyStateActionsExistInOrder(array $names): static {}
 
         public function assertTableActionVisible(string $name, $record = null): static {}
 
@@ -25,7 +35,7 @@ namespace Livewire\Testing {
 
         public function assertTableActionDisabled(string $name, $record = null): static {}
 
-        public function assertTableActionHeld(string $name): static {}
+        public function assertTableActionHalted(string $name): static {}
 
         public function assertHasTableActionErrors(array $keys = []): static {}
 
@@ -43,6 +53,10 @@ namespace Livewire\Testing {
 
         public function assertTableBulkActionExists(string $name): static {}
 
+        public function assertTableBulkActionDoesNotExist(string $name): static {}
+
+        public function assertTableBulkActionsExistInOrder(array $names): static {}
+
         public function assertTableBulkActionVisible(string $name): static {}
 
         public function assertTableBulkActionHidden(string $name): static {}
@@ -57,11 +71,11 @@ namespace Livewire\Testing {
 
         public function assertTableActionHasLabel(string $name, string $label): static {}
 
+        public function assertTableActionDoesNotHaveLabel(string $name, string $label): static {}
+
         public function assertTableActionHasColor(string $name, string $color): static {}
 
         public function assertTableActionDoesNotHaveColor(string $name, string $color): static {}
-
-        public function assertTableActionDoesNotHaveLabel(string $name, string $label): static {}
 
         public function assertTableBulkActionHasIcon(string $name, string $icon): static {}
 
@@ -75,7 +89,15 @@ namespace Livewire\Testing {
 
         public function assertTableBulkActionDoesNotHaveColor(string $name, string $color): static {}
 
-        public function assertTableBulkActionHeld(string $name): static {}
+        public function assertTableActionHasUrl(string $name, string $url): static {}
+
+        public function assertTableActionDoesNotHaveUrl(string $name, string $url): static {}
+
+        public function assertTableActionShouldOpenUrlInNewTab(string $name): static {}
+
+        public function assertTableActionShouldNotOpenUrlInNewTab(string $name): static {}
+
+        public function assertTableBulkActionHalted(string $name): static {}
 
         public function assertHasTableBulkActionErrors(array $keys = []): static {}
 
@@ -83,25 +105,55 @@ namespace Livewire\Testing {
 
         public function assertCanRenderTableColumn(string $name): static {}
 
+        public function assertCanNotRenderTableColumn(string $name): static {}
+
         public function assertTableColumnExists(string $name): static {}
 
         public function assertTableColumnVisible(string $name): static {}
 
         public function assertTableColumnHidden(string $name): static {}
 
+        public function assertTableColumnStateSet(string $name, $value, $record): static {}
+
+        public function assertTableColumnStateNotSet(string $name, $value, $record): static {}
+
+        public function assertTableColumnFormattedStateSet(string $name, $value, $record): static {}
+
+        public function assertTableColumnFormattedStateNotSet(string $name, $value, $record): static {}
+
+        public function assertTableColumnHasExtraAttributes(string $name, $value, $record): static {}
+
+        public function assertTableColumnDoesNotHaveExtraAttributes(string $name, $value, $record): static {}
+
+        public function assertTableColumnHasDescription(string $name, $description, $record, $position = 'below'): static {}
+
+        public function assertTableColumnDoesNotHaveDescription(string $name, $description, $record, $position = 'below'): static {}
+
+        public function assertSelectColumnHasOptions(string $name, array $options, $record): static {}
+
+        public function assertSelectColumnDoesNotHaveOptions(string $name, array $options, $record): static {}
+
         public function sortTable(?string $name = null, ?string $direction = null): static {}
 
         public function searchTable(?string $search = null): static {}
 
+        public function searchTableColumns(array $searches): static {}
+
         public function filterTable(string $name, $data = null): static {}
 
         public function resetTableFilters(): static {}
+
+        public function removeTableFilter(string $filter, ?string $field = null): static {}
+
+        public function removeTableFilters(): static {}
 
         public function assertCanSeeTableRecords(array | Collection $records, bool $inOrder = false): static {}
 
         public function assertCanNotSeeTableRecords(array | Collection $records): static {}
 
         public function assertCountTableRecords(int $count): static {}
+
+        public function loadTable(): static {}
     }
 
 }

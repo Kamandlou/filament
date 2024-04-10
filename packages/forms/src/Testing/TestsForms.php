@@ -16,6 +16,106 @@ use Livewire\Testing\TestableLivewire;
  */
 class TestsForms
 {
+    public function fillForm(): Closure
+    {
+        return function (array $state = [], string $formName = 'form'): static {
+            /** @phpstan-ignore-next-line  */
+            $this->assertFormExists($formName);
+
+            $livewire = $this->instance();
+
+            /** @var ComponentContainer $form */
+            $form = $livewire->{$formName};
+
+            $formStatePath = $form->getStatePath();
+
+            foreach ($state as $key => $value) {
+                $this->set((filled($formStatePath) ? "{$formStatePath}.{$key}" : $key), $value);
+            }
+
+            return $this;
+        };
+    }
+
+    public function assertFormSet(): Closure
+    {
+        return function (array $state, string $formName = 'form'): static {
+            /** @phpstan-ignore-next-line  */
+            $this->assertFormExists($formName);
+
+            $livewire = $this->instance();
+
+            /** @var ComponentContainer $form */
+            $form = $livewire->{$formName};
+
+            $formStatePath = $form->getStatePath();
+
+            foreach ($state as $key => $value) {
+                $this->assertSet((filled($formStatePath) ? "{$formStatePath}.{$key}" : $key), $value);
+            }
+
+            return $this;
+        };
+    }
+
+    public function assertHasFormErrors(): Closure
+    {
+        return function (array $keys = [], string $formName = 'form'): static {
+            /** @phpstan-ignore-next-line  */
+            $this->assertFormExists($formName);
+
+            $livewire = $this->instance();
+
+            /** @var ComponentContainer $form */
+            $form = $livewire->{$formName};
+
+            $formStatePath = $form->getStatePath();
+
+            $this->assertHasErrors(
+                collect($keys)
+                    ->mapWithKeys(function ($value, $key) use ($formStatePath): array {
+                        if (is_int($key)) {
+                            return [$key => (filled($formStatePath) ? "{$formStatePath}.{$value}" : $value)];
+                        }
+
+                        return [(filled($formStatePath) ? "{$formStatePath}.{$key}" : $key) => $value];
+                    })
+                    ->all(),
+            );
+
+            return $this;
+        };
+    }
+
+    public function assertHasNoFormErrors(): Closure
+    {
+        return function (array $keys = [], string $formName = 'form'): static {
+            /** @phpstan-ignore-next-line  */
+            $this->assertFormExists($formName);
+
+            $livewire = $this->instance();
+
+            /** @var ComponentContainer $form */
+            $form = $livewire->{$formName};
+
+            $formStatePath = $form->getStatePath();
+
+            $this->assertHasNoErrors(
+                collect($keys)
+                    ->mapWithKeys(function ($value, $key) use ($formStatePath): array {
+                        if (is_int($key)) {
+                            return [$key => (filled($formStatePath) ? "{$formStatePath}.{$value}" : $value)];
+                        }
+
+                        return [(filled($formStatePath) ? "{$formStatePath}.{$key}" : $key) => $value];
+                    })
+                    ->all(),
+            );
+
+            return $this;
+        };
+    }
+
     public function assertFormExists(): Closure
     {
         return function (string $name = 'form'): static {
@@ -23,7 +123,7 @@ class TestsForms
             $livewireClass = $livewire::class;
 
             /** @var ComponentContainer $form */
-            $form = $livewire->$name;
+            $form = $livewire->{$name};
 
             Assert::assertInstanceOf(
                 ComponentContainer::class,
@@ -37,7 +137,12 @@ class TestsForms
 
     public function assertFormFieldExists(): Closure
     {
-        return function (string $fieldName, string $formName = 'form'): static {
+        return function (string $fieldName, string | Closure $formName = 'form', ?Closure $callback = null): static {
+            if ($formName instanceof Closure) {
+                $callback = $formName;
+                $formName = 'form';
+            }
+
             /** @phpstan-ignore-next-line  */
             $this->assertFormExists($formName);
 
@@ -45,16 +150,23 @@ class TestsForms
             $livewireClass = $livewire::class;
 
             /** @var ComponentContainer $form */
-            $form = $livewire->$formName;
+            $form = $livewire->{$formName};
 
             /** @var ?Field $field */
-            $field = data_get($form->getFlatFields(withHidden: true), $fieldName, null);
+            $field = $form->getFlatFields(withHidden: true)[$fieldName] ?? null;
 
             Assert::assertInstanceOf(
                 Field::class,
                 $field,
-                "Failed asserting that a field with the name [{$fieldName}] exists on the form with the name [${formName}] on the [{$livewireClass}] component."
+                "Failed asserting that a field with the name [{$fieldName}] exists on the form with the name [{$formName}] on the [{$livewireClass}] component."
             );
+
+            if ($callback) {
+                Assert::assertTrue(
+                    $callback($field),
+                    "Failed asserting that a field with the name [{$fieldName}] and provided configuration exists on the form with the name [{$formName}] on the [{$livewireClass}] component."
+                );
+            }
 
             return $this;
         };
@@ -63,22 +175,18 @@ class TestsForms
     public function assertFormFieldIsDisabled(): Closure
     {
         return function (string $fieldName, string $formName = 'form'): static {
-            /** @phpstan-ignore-next-line  */
-            $this->assertFormFieldExists($fieldName, $formName);
-
             $livewire = $this->instance();
             $livewireClass = $livewire::class;
 
-            /** @var ComponentContainer $form */
-            $form = $livewire->$formName;
+            /** @phpstan-ignore-next-line  */
+            $this->assertFormFieldExists($fieldName, $formName, function (Field $field) use ($fieldName, $formName, $livewireClass): bool {
+                Assert::assertTrue(
+                    $field->isDisabled(),
+                    "Failed asserting that a field with the name [{$fieldName}] is disabled on the form named [{$formName}] on the [{$livewireClass}] component."
+                );
 
-            /** @var Field $field */
-            $field = $form->getFlatFields(withHidden: true)[$fieldName];
-
-            Assert::assertTrue(
-                $field->isDisabled(),
-                "Failed asserting that a field with the name [{$fieldName}] is disabled on the form named [{$formName}] on the [{$livewireClass}] component."
-            );
+                return true;
+            });
 
             return $this;
         };
@@ -87,22 +195,18 @@ class TestsForms
     public function assertFormFieldIsEnabled(): Closure
     {
         return function (string $fieldName, string $formName = 'form'): static {
-            /** @phpstan-ignore-next-line  */
-            $this->assertFormFieldExists($fieldName, $formName);
-
             $livewire = $this->instance();
             $livewireClass = $livewire::class;
 
-            /** @var ComponentContainer $form */
-            $form = $livewire->$formName;
+            /** @phpstan-ignore-next-line  */
+            $this->assertFormFieldExists($fieldName, $formName, function (Field $field) use ($fieldName, $formName, $livewireClass): bool {
+                Assert::assertFalse(
+                    $field->isDisabled(),
+                    "Failed asserting that a field with the name [{$fieldName}] is enabled on the form named [{$formName}] on the [{$livewireClass}] component."
+                );
 
-            /** @var Field $field */
-            $field = $form->getFlatFields(withHidden: true)[$fieldName];
-
-            Assert::assertFalse(
-                $field->isDisabled(),
-                "Failed asserting that a field with the name [{$fieldName}] is enabled on the form named [{$formName}] on the [{$livewireClass}] component."
-            );
+                return true;
+            });
 
             return $this;
         };
@@ -118,7 +222,7 @@ class TestsForms
             $livewireClass = $livewire::class;
 
             /** @var ComponentContainer $form */
-            $form = $livewire->$formName;
+            $form = $livewire->{$formName};
 
             $fields = $form->getFlatFields(withHidden: false);
 
@@ -142,7 +246,7 @@ class TestsForms
             $livewireClass = $livewire::class;
 
             /** @var ComponentContainer $form */
-            $form = $livewire->$formName;
+            $form = $livewire->{$formName};
 
             $fields = $form->getFlatFields(withHidden: false);
 

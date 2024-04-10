@@ -50,6 +50,16 @@ trait CanSortRecords
 
     public function updatedTableSort(): void
     {
+        if ($this->shouldPersistTableSortInSession()) {
+            session()->put(
+                $this->getTableSortSessionKey(),
+                [
+                    'column' => $this->tableSortColumn,
+                    'direction' => $this->tableSortDirection,
+                ],
+            );
+        }
+
         $this->resetPage();
     }
 
@@ -59,24 +69,46 @@ trait CanSortRecords
             return $query->orderBy($this->getTableReorderColumn());
         }
 
-        $columnName = $this->tableSortColumn;
+        $sortColumn = $this->tableSortColumn ?? $this->getDefaultTableSortColumn();
 
-        if (! $columnName) {
+        if (! $sortColumn) {
             return $query;
         }
 
-        $direction = $this->tableSortDirection === 'desc' ? 'desc' : 'asc';
+        $sortDirection = $this->tableSortDirection ?? $this->getDefaultTableSortDirection();
+        $sortDirection = $sortDirection === 'desc' ? 'desc' : 'asc';
 
-        if ($column = $this->getCachedTableColumn($columnName)) {
-            $column->applySort($query, $direction);
+        $column = $this->getCachedTableColumn($sortColumn);
+
+        if ($column && (! $column->isHidden()) && $column->isSortable()) {
+            $column->applySort($query, $sortDirection);
 
             return $query;
         }
 
-        if ($columnName === $this->getDefaultTableSortColumn()) {
-            return $query->orderBy($columnName, $direction);
-        }
+        $this->applyDefaultSortingToTableQuery($query, $sortColumn, $sortDirection);
 
         return $query;
+    }
+
+    protected function applyDefaultSortingToTableQuery(Builder $query, string $sortColumn, string $sortDirection): Builder
+    {
+        if ($sortColumn !== $this->getDefaultTableSortColumn()) {
+            return $query;
+        }
+
+        return $query->orderBy($sortColumn, $sortDirection);
+    }
+
+    public function getTableSortSessionKey(): string
+    {
+        $table = class_basename($this::class);
+
+        return "tables.{$table}_sort";
+    }
+
+    protected function shouldPersistTableSortInSession(): bool
+    {
+        return false;
     }
 }

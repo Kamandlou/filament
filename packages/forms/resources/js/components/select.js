@@ -17,12 +17,17 @@ export default (Alpine) => {
             hasDynamicSearchResults,
             loadingMessage,
             maxItems,
+            maxItemsMessage,
             noSearchResultsMessage,
             options,
             optionsLimit,
             placeholder,
+            position,
+            isPlaceholderSelectionDisabled,
+            searchDebounce,
             searchingMessage,
             searchPrompt,
+            searchableOptionFields,
             state,
         }) => {
             return {
@@ -43,14 +48,21 @@ export default (Alpine) => {
                         itemSelectText: '',
                         loadingText: loadingMessage,
                         maxItemCount: maxItems ?? -1,
+                        maxItemText: (maxItemCount) =>
+                            window.pluralize(maxItemsMessage, maxItemCount, {
+                                count: maxItemCount,
+                            }),
                         noChoicesText: searchPrompt,
                         noResultsText: noSearchResultsMessage,
                         placeholderValue: placeholder,
-                        removeItemButton: true,
+                        position: position ?? 'auto',
+                        removeItemButton: !isPlaceholderSelectionDisabled,
                         renderChoiceLimit: optionsLimit,
-                        searchFields: ['label'],
+                        searchFields: searchableOptionFields ?? ['label'],
+                        searchPlaceholderValue: searchPrompt,
                         searchResultLimit: optionsLimit,
                         shouldSort: false,
+                        searchFloor: hasDynamicSearchResults ? 0 : 1,
                     })
 
                     await this.refreshChoices({ withInitialOptions: true })
@@ -86,8 +98,8 @@ export default (Alpine) => {
                                 this.select.clearChoices()
                                 await this.select.setChoices([
                                     {
-                                        value: '',
                                         label: loadingMessage,
+                                        value: '',
                                         disabled: true,
                                     },
                                 ])
@@ -103,17 +115,17 @@ export default (Alpine) => {
                             async (event) => {
                                 let search = event.detail.value?.trim()
 
-                                if ([null, undefined, ''].includes(search)) {
-                                    return
-                                }
-
                                 this.isSearching = true
 
                                 this.select.clearChoices()
                                 await this.select.setChoices([
                                     {
+                                        label: [null, undefined, ''].includes(
+                                            search,
+                                        )
+                                            ? loadingMessage
+                                            : searchingMessage,
                                         value: '',
-                                        label: searchingMessage,
                                         disabled: true,
                                     },
                                 ])
@@ -128,7 +140,7 @@ export default (Alpine) => {
                                 })
 
                                 this.isSearching = false
-                            }, 1000),
+                            }, searchDebounce),
                         )
                     }
 
@@ -144,6 +156,8 @@ export default (Alpine) => {
                         })
 
                         this.select.clearStore()
+
+                        this.refreshPlaceholder()
 
                         this.setChoices(choices)
 
@@ -164,12 +178,11 @@ export default (Alpine) => {
                 },
 
                 getChoices: async function (config = {}) {
-                    const options = await this.getOptions(config)
+                    const existingOptions = await this.getOptions(config)
 
-                    return this.transformOptionsIntoChoices({
-                        ...options,
-                        ...(await this.getMissingOptions(options)),
-                    })
+                    return existingOptions.concat(
+                        await this.getMissingOptions(existingOptions),
+                    )
                 },
 
                 getOptions: async function ({ search, withInitialOptions }) {
@@ -186,13 +199,6 @@ export default (Alpine) => {
                     }
 
                     return await getOptionsUsing()
-                },
-
-                transformOptionsIntoChoices: function (options) {
-                    return Object.entries(options).map(([value, label]) => ({
-                        label,
-                        value,
-                    }))
                 },
 
                 refreshPlaceholder: function () {
@@ -219,30 +225,41 @@ export default (Alpine) => {
                     return state?.toString()
                 },
 
-                getMissingOptions: async function (options) {
-                    if ([null, undefined, '', [], {}].includes(this.state)) {
+                getMissingOptions: async function (existingOptions) {
+                    let state = this.formatState(this.state)
+
+                    if ([null, undefined, '', [], {}].includes(state)) {
                         return {}
                     }
 
-                    if (!options.length) {
-                        options = {}
-                    }
+                    const existingOptionValues = new Set(
+                        existingOptions.length
+                            ? existingOptions.map((option) => option.value)
+                            : [],
+                    )
 
                     if (isMultiple) {
-                        if (this.state.every((value) => value in options)) {
+                        if (
+                            state.every((value) =>
+                                existingOptionValues.has(value),
+                            )
+                        ) {
                             return {}
                         }
 
                         return await getOptionLabelsUsing()
                     }
 
-                    if (this.state in options) {
-                        return options
+                    if (existingOptionValues.has(state)) {
+                        return existingOptionValues
                     }
 
-                    let missingOptions = {}
-                    missingOptions[this.state] = await getOptionLabelUsing()
-                    return missingOptions
+                    return [
+                        {
+                            label: await getOptionLabelUsing(),
+                            value: state,
+                        },
+                    ]
                 },
             }
         },

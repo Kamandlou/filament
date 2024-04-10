@@ -8,12 +8,24 @@ return [
 
         'buttons' => [
 
+            'clone_item' => [
+                'label' => 'Nhân bản',
+            ],
+
             'create_item' => [
                 'label' => 'Thêm :label mới',
             ],
 
+            'create_item_between' => [
+                'label' => 'Chèn',
+            ],
+
             'delete_item' => [
                 'label' => 'Xóa',
+            ],
+
+            'move_item' => [
+                'label' => 'Di chuyển',
             ],
 
             'move_item_down' => [
@@ -44,6 +56,22 @@ return [
 
     ],
 
+    'checkbox_list' => [
+
+        'buttons' => [
+
+            'deselect_all' => [
+                'label' => 'Bỏ chọn tất cả',
+            ],
+
+            'select_all' => [
+                'label' => 'Chọn tất cả',
+            ],
+
+        ],
+
+    ],
+
     'key_value' => [
 
         'buttons' => [
@@ -54,6 +82,10 @@ return [
 
             'delete' => [
                 'label' => 'Xóa dòng',
+            ],
+
+            'reorder' => [
+                'label' => 'Xếp lại dòng',
             ],
 
         ],
@@ -101,6 +133,14 @@ return [
 
             'delete_item' => [
                 'label' => 'Xóa',
+            ],
+
+            'move_item' => [
+                'label' => 'Di chuyển',
+            ],
+
+            'clone_item' => [
+                'label' => 'Nhân bản',
             ],
 
             'move_item_down' => [
@@ -199,6 +239,8 @@ return [
         ],
 
         'loading_message' => 'Đang tải...',
+
+        'max_items_message' => 'Chỉ có :count có thể chọn được.',
 
         'no_search_results_message' => 'Không có tùy chọn nào phù hợp với tìm kiếm của bạn.',
 

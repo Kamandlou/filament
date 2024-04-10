@@ -8,9 +8,21 @@ return [
             'more' => 'e :count mais',
         ],
 
+        'messages' => [
+            'copied' => 'Copiado',
+        ],
+
     ],
 
     'fields' => [
+
+        'bulk_select_page' => [
+            'label' => 'Marcar/desmarcar todos os itens para ações em massa.',
+        ],
+
+        'bulk_select_record' => [
+            'label' => 'Marcar/desmarcar o item :key para ações em massa.',
+        ],
 
         'search_query' => [
             'label' => 'Procurar',
@@ -23,7 +35,7 @@ return [
 
         'label' => 'Paginação',
 
-        'overview' => 'Exibindo :first a :last de :total resultados',
+        'overview' => '{1} Exibindo 1 resultado|[2,*] Exibindo :first a :last de :total resultados',
 
         'fields' => [
 
@@ -82,7 +94,17 @@ return [
     ],
 
     'empty' => [
+
         'heading' => 'Sem registros',
+
+        'buttons' => [
+
+            'reset_column_searches' => [
+                'label' => 'Limpar pesquisa de colunas',
+            ],
+
+        ],
+
     ],
 
     'filters' => [
@@ -100,10 +122,6 @@ return [
 
             'reset' => [
                 'label' => 'Limpar filtros',
-            ],
-
-            'close' => [
-                'label' => 'Fechar',
             ],
 
         ],
@@ -146,6 +164,29 @@ return [
 
             'deselect_all' => [
                 'label' => 'Desselecionar todos',
+            ],
+
+        ],
+
+    ],
+
+    'sorting' => [
+
+        'fields' => [
+
+            'column' => [
+                'label' => 'Ordenar por',
+            ],
+
+            'direction' => [
+
+                'label' => 'Direção de ordenação',
+
+                'options' => [
+                    'asc' => 'Ascendente',
+                    'desc' => 'Descendente',
+                ],
+
             ],
 
         ],

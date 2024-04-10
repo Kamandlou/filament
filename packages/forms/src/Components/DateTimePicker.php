@@ -18,11 +18,13 @@ class DateTimePicker extends Field
 
     protected string | Closure | null $displayFormat = null;
 
-    protected array | Closure $extraTriggerAttributes = [];
+    protected array $extraTriggerAttributes = [];
 
     protected int | null $firstDayOfWeek = null;
 
     protected string | Closure | null $format = null;
+
+    protected string | bool | Closure | null $icon = null;
 
     protected bool | Closure $isWithoutDate = false;
 
@@ -37,6 +39,14 @@ class DateTimePicker extends Field
     protected CarbonInterface | string | Closure | null $minDate = null;
 
     protected string | Closure | null $timezone = null;
+
+    protected array | Closure $disabledDates = [];
+
+    protected int | Closure | null $hoursStep = null;
+
+    protected int | Closure | null $minutesStep = null;
+
+    protected int | Closure | null $secondsStep = null;
 
     protected function setUp(): void
     {
@@ -88,9 +98,13 @@ class DateTimePicker extends Field
         return $this;
     }
 
-    public function extraTriggerAttributes(array | Closure $attributes): static
+    public function extraTriggerAttributes(array | Closure $attributes, bool $merge = false): static
     {
-        $this->extraTriggerAttributes = $attributes;
+        if ($merge) {
+            $this->extraAttributes[] = $attributes;
+        } else {
+            $this->extraAttributes = [$attributes];
+        }
 
         return $this;
     }
@@ -109,6 +123,13 @@ class DateTimePicker extends Field
     public function format(string | Closure | null $format): static
     {
         $this->format = $format;
+
+        return $this;
+    }
+
+    public function icon(string | bool | Closure | null $icon): static
+    {
+        $this->icon = $icon;
 
         return $this;
     }
@@ -135,9 +156,37 @@ class DateTimePicker extends Field
         return $this;
     }
 
+    public function disabledDates(array | Closure $dates): static
+    {
+        $this->disabledDates = $dates;
+
+        return $this;
+    }
+
     public function resetFirstDayOfWeek(): static
     {
         $this->firstDayOfWeek(null);
+
+        return $this;
+    }
+
+    public function hoursStep(int | Closure | null $hoursStep): static
+    {
+        $this->hoursStep = $hoursStep;
+
+        return $this;
+    }
+
+    public function minutesStep(int | Closure | null $minutesStep): static
+    {
+        $this->minutesStep = $minutesStep;
+
+        return $this;
+    }
+
+    public function secondsStep(int | Closure | null $secondsStep): static
+    {
+        $this->secondsStep = $secondsStep;
 
         return $this;
     }
@@ -216,7 +265,13 @@ class DateTimePicker extends Field
 
     public function getExtraTriggerAttributes(): array
     {
-        return $this->evaluate($this->extraTriggerAttributes);
+        $temporaryAttributeBag = new ComponentAttributeBag();
+
+        foreach ($this->extraTriggerAttributes as $extraTriggerAttributes) {
+            $temporaryAttributeBag = $temporaryAttributeBag->merge($this->evaluate($extraTriggerAttributes));
+        }
+
+        return $temporaryAttributeBag->getAttributes();
     }
 
     public function getExtraTriggerAttributeBag(): ComponentAttributeBag
@@ -262,6 +317,11 @@ class DateTimePicker extends Field
         return $this->evaluate($this->minDate);
     }
 
+    public function getDisabledDates(): array
+    {
+        return $this->evaluate($this->disabledDates);
+    }
+
     public function getTimezone(): string
     {
         return $this->evaluate($this->timezone) ?? config('app.timezone');
@@ -269,17 +329,32 @@ class DateTimePicker extends Field
 
     public function hasDate(): bool
     {
-        return ! $this->isWithoutDate;
+        return ! $this->evaluate($this->isWithoutDate);
     }
 
     public function hasSeconds(): bool
     {
-        return ! $this->isWithoutSeconds;
+        return ! $this->evaluate($this->isWithoutSeconds);
     }
 
     public function hasTime(): bool
     {
-        return ! $this->isWithoutTime;
+        return ! $this->evaluate($this->isWithoutTime);
+    }
+
+    public function getHoursStep(): int
+    {
+        return $this->evaluate($this->hoursStep) ?? 1;
+    }
+
+    public function getMinutesStep(): int
+    {
+        return $this->evaluate($this->minutesStep) ?? 1;
+    }
+
+    public function getSecondsStep(): int
+    {
+        return $this->evaluate($this->secondsStep) ?? 1;
     }
 
     public function shouldCloseOnDateSelection(): bool
@@ -290,5 +365,10 @@ class DateTimePicker extends Field
     protected function getDefaultFirstDayOfWeek(): int
     {
         return config('forms.components.date_time_picker.first_day_of_week', 1);
+    }
+
+    public function getIcon(): string | bool | null
+    {
+        return $this->evaluate($this->icon);
     }
 }

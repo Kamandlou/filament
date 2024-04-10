@@ -8,20 +8,32 @@ return [
 
         'buttons' => [
 
+            'clone_item' => [
+                'label' => 'Kopieren',
+            ],
+
             'create_item' => [
-                'label' => 'Zu :label hinzufügen',
+                'label' => 'Hinzufügen',
+            ],
+
+            'create_item_between' => [
+                'label' => 'Einfügen',
             ],
 
             'delete_item' => [
                 'label' => 'Löschen',
             ],
 
+            'move_item' => [
+                'label' => 'Verschieben',
+            ],
+
             'move_item_down' => [
-                'label' => 'Runter verschieben',
+                'label' => 'Nach unten verschieben',
             ],
 
             'move_item_up' => [
-                'label' => 'Hoch verschieben',
+                'label' => 'Nach oben verschieben',
             ],
 
             'collapse_item' => [
@@ -44,6 +56,22 @@ return [
 
     ],
 
+    'checkbox_list' => [
+
+        'buttons' => [
+
+            'deselect_all' => [
+                'label' => 'Alle deselektieren',
+            ],
+
+            'select_all' => [
+                'label' => 'Alle selektieren',
+            ],
+
+        ],
+
+    ],
+
     'key_value' => [
 
         'buttons' => [
@@ -54,6 +82,10 @@ return [
 
             'delete' => [
                 'label' => 'Zeile löschen',
+            ],
+
+            'reorder' => [
+                'label' => 'Zeile neu sortieren',
             ],
 
         ],
@@ -96,7 +128,7 @@ return [
         'buttons' => [
 
             'create_item' => [
-                'label' => 'Zu :label hinzufügen',
+                'label' => 'Hinzufügen',
             ],
 
             'delete_item' => [
@@ -104,7 +136,11 @@ return [
             ],
 
             'clone_item' => [
-                'label' => 'Klonen',
+                'label' => 'Kopieren',
+            ],
+
+            'move_item' => [
+                'label' => 'Verschieben',
             ],
 
             'move_item_down' => [
@@ -204,7 +240,9 @@ return [
 
         'loading_message' => 'Lädt...',
 
-        'no_search_results_message' => 'Keine Optionen passen zu Ihrer Suche.',
+        'max_items_message' => 'Es können nur :count ausgewählt werden.',
+
+        'no_search_results_message' => 'Die Suche ergab keine Treffer.',
 
         'placeholder' => 'Wählen Sie eine Option',
 

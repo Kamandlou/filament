@@ -16,6 +16,10 @@ return [
                 'label' => 'Видалити',
             ],
 
+            'move_item' => [
+                'label' => 'Перемістити',
+            ],
+
             'move_item_down' => [
                 'label' => 'Перемістити вниз',
             ],
@@ -80,7 +84,7 @@ return [
             'bullet_list' => 'Маркувальний список',
             'code_block' => 'Код',
             'edit' => 'Редагувати',
-            'italic' => 'Курсів',
+            'italic' => 'Курсив',
             'link' => 'Посилання',
             'ordered_list' => 'Нумерований список',
             'preview' => 'Перегляд',
@@ -101,6 +105,10 @@ return [
 
             'delete_item' => [
                 'label' => 'Видалити',
+            ],
+
+            'move_item' => [
+                'label' => 'Перемістити',
             ],
 
             'clone_item' => [

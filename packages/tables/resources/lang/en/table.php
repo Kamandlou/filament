@@ -8,9 +8,21 @@ return [
             'more' => 'and :count more',
         ],
 
+        'messages' => [
+            'copied' => 'Copied',
+        ],
+
     ],
 
     'fields' => [
+
+        'bulk_select_page' => [
+            'label' => 'Select/deselect all items for bulk actions.',
+        ],
+
+        'bulk_select_record' => [
+            'label' => 'Select/deselect item :key for bulk actions.',
+        ],
 
         'search_query' => [
             'label' => 'Search',
@@ -23,7 +35,7 @@ return [
 
         'label' => 'Pagination Navigation',
 
-        'overview' => 'Showing :first to :last of :total results',
+        'overview' => '{1} Showing 1 result|[2,*] Showing :first to :last of :total results',
 
         'fields' => [
 
@@ -82,7 +94,17 @@ return [
     ],
 
     'empty' => [
+
         'heading' => 'No records found',
+
+        'buttons' => [
+
+            'reset_column_searches' => [
+                'label' => 'Clear column search',
+            ],
+
+        ],
+
     ],
 
     'filters' => [
@@ -142,6 +164,29 @@ return [
 
             'deselect_all' => [
                 'label' => 'Deselect all',
+            ],
+
+        ],
+
+    ],
+
+    'sorting' => [
+
+        'fields' => [
+
+            'column' => [
+                'label' => 'Sort by',
+            ],
+
+            'direction' => [
+
+                'label' => 'Sort direction',
+
+                'options' => [
+                    'asc' => 'Ascending',
+                    'desc' => 'Descending',
+                ],
+
             ],
 
         ],

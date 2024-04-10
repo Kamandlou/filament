@@ -9,6 +9,8 @@ class Table
 {
     protected array $actions = [];
 
+    protected ?string $actionsPosition = null;
+
     protected array $bulkActions = [];
 
     protected array $columns = [];
@@ -21,9 +23,15 @@ class Table
 
     protected ?string $filtersLayout = null;
 
+    protected ?string $recordCheckboxPosition = null;
+
     protected array $headerActions = [];
 
+    protected ?array $contentGrid = null;
+
     protected ?string $pollingInterval = null;
+
+    protected ?bool $isLoadingDeferred = false;
 
     protected ?string $reorderColumn = null;
 
@@ -36,9 +44,17 @@ class Table
         return app(static::class);
     }
 
-    public function actions(array | ActionGroup $actions): static
+    public function actions(array | ActionGroup $actions, ?string $position = null): static
     {
         $this->actions = Arr::wrap($actions);
+        $this->actionsPosition($position);
+
+        return $this;
+    }
+
+    public function actionsPosition(?string $position = null): static
+    {
+        $this->actionsPosition = $position;
 
         return $this;
     }
@@ -53,6 +69,13 @@ class Table
     public function columns(array $columns): static
     {
         $this->columns = $columns;
+
+        return $this;
+    }
+
+    public function contentGrid(?array $grid): static
+    {
+        $this->contentGrid = $grid;
 
         return $this;
     }
@@ -76,6 +99,13 @@ class Table
     public function filtersLayout(?string $filtersLayout): static
     {
         $this->filtersLayout = $filtersLayout;
+
+        return $this;
+    }
+
+    public function recordCheckboxPosition(?string $recordCheckboxPosition): static
+    {
+        $this->recordCheckboxPosition = $recordCheckboxPosition;
 
         return $this;
     }
@@ -136,6 +166,13 @@ class Table
         return $this;
     }
 
+    public function deferLoading(bool $condition = true): static
+    {
+        $this->isLoadingDeferred = $condition;
+
+        return $this;
+    }
+
     /**
      * @deprecated Use `appendActions()` instead.
      */
@@ -178,6 +215,11 @@ class Table
         return $this->actions;
     }
 
+    public function getActionsPosition(): ?string
+    {
+        return $this->actionsPosition;
+    }
+
     public function getBulkActions(): array
     {
         return $this->bulkActions;
@@ -186,6 +228,11 @@ class Table
     public function getColumns(): array
     {
         return $this->columns;
+    }
+
+    public function getContentGrid(): ?array
+    {
+        return $this->contentGrid;
     }
 
     public function getDefaultSortColumn(): ?string
@@ -208,6 +255,11 @@ class Table
         return $this->filtersLayout;
     }
 
+    public function getRecordCheckboxPosition(): ?string
+    {
+        return $this->recordCheckboxPosition;
+    }
+
     public function getHeaderActions(): array
     {
         return $this->headerActions;
@@ -221,5 +273,10 @@ class Table
     public function getPollingInterval(): ?string
     {
         return $this->pollingInterval;
+    }
+
+    public function isLoadingDeferred(): bool
+    {
+        return $this->isLoadingDeferred;
     }
 }

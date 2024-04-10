@@ -6,6 +6,7 @@ use Filament\Forms\ComponentContainer;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\Layout\Component;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +21,9 @@ interface HasTable extends HasForms
 
     public function getActiveTableLocale(): ?string;
 
-    public function getAllTableRecordKeys(): array;
+    public function getAllSelectableTableRecordKeys(): array;
+
+    public function getAllSelectableTableRecordsCount(): int;
 
     public function getAllTableRecordsCount(): int;
 
@@ -30,11 +33,21 @@ interface HasTable extends HasForms
 
     public function getCachedTableColumns(): array;
 
+    public function getCachedTableColumnsLayout(): array;
+
+    public function getCachedCollapsibleTableColumnsLayout(): ?Component;
+
+    public function hasTableColumnsLayout(): bool;
+
     public function getCachedTableEmptyStateActions(): array;
 
     public function getCachedTableFilters(): array;
 
     public function getCachedTableHeaderActions(): array;
+
+    public function getTableFilterState(string $name): ?array;
+
+    public function parseFilterName(string $name): string;
 
     public function getMountedTableAction(): ?Action;
 
@@ -64,6 +77,8 @@ interface HasTable extends HasForms
 
     public function isTableSelectionEnabled(): bool;
 
+    public function getTableRecordCheckboxPosition(): string;
+
     public function hasToggleableTableColumns(): bool;
 
     public function isTableColumnToggledHidden(string $name): bool;
@@ -85,4 +100,8 @@ interface HasTable extends HasForms
     public function toggleTableReordering(): void;
 
     public function isTableReordering(): bool;
+
+    public function isTableLoaded(): bool;
+
+    public function hasTableColumnSearches(): bool;
 }

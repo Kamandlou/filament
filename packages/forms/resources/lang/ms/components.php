@@ -8,12 +8,24 @@ return [
 
         'buttons' => [
 
+            'clone_item' => [
+                'label' => 'Klon',
+            ],
+
             'create_item' => [
                 'label' => 'Tambah ke :label',
             ],
 
+            'create_item_between' => [
+                'label' => 'Masukkan',
+            ],
+
             'delete_item' => [
                 'label' => 'Padam',
+            ],
+
+            'move_item' => [
+                'label' => 'Pindah',
             ],
 
             'move_item_down' => [
@@ -44,6 +56,22 @@ return [
 
     ],
 
+    'checkbox_list' => [
+
+        'buttons' => [
+
+            'deselect_all' => [
+                'label' => 'Nyahpilih semua',
+            ],
+
+            'select_all' => [
+                'label' => 'Pilih semua',
+            ],
+
+        ],
+
+    ],
+
     'key_value' => [
 
         'buttons' => [
@@ -54,6 +82,10 @@ return [
 
             'delete' => [
                 'label' => 'Padam Baris',
+            ],
+
+            'reorder' => [
+                'label' => 'Susun Baris',
             ],
 
         ],
@@ -101,6 +133,10 @@ return [
 
             'delete_item' => [
                 'label' => 'Padam',
+            ],
+
+            'move_item' => [
+                'label' => 'Pindah',
             ],
 
             'clone_item' => [
@@ -203,6 +239,8 @@ return [
         ],
 
         'loading_message' => 'Memuatkan...',
+
+        'max_items_message' => 'Hanya :count boleh dipilih.',
 
         'no_search_results_message' => 'Tiada pilihan yang sepadan dengan carian anda.',
 

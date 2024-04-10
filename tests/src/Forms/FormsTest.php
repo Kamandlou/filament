@@ -21,13 +21,26 @@ it('can have forms with non-default names', function () {
 
 it('has fields', function () {
     livewire(TestComponentWithForm::class)
-        ->assertFormFieldExists('title');
+        ->assertFormFieldExists('title')
+        ->assertFormFieldExists('nested.input')
+        ->assertFormFieldExists('disabled', function (TextInput $field): bool {
+            return $field->isDisabled();
+        });
 });
 
 it('has fields on multiple forms', function () {
     livewire(TestComponentWithMultipleForms::class)
         ->assertFormFieldExists('title', 'fooForm')
-        ->assertFormFieldExists('title', 'barForm');
+        ->assertFormFieldExists('title', 'barForm')
+        ->assertFormFieldExists('disabled', 'barForm', function (TextInput $field): bool {
+            return $field->isDisabled();
+        });
+});
+
+it('can fill fields on multiple forms', function () {
+    livewire(TestComponentWithMultipleForms::class)
+        ->fillForm(['title' => 'value'], 'fooForm')
+        ->assertFormSet(['title' => 'value'], 'fooForm');
 });
 
 it('can have disabled fields', function () {
@@ -81,6 +94,8 @@ class TestComponentWithForm extends Livewire
         return [
             TextInput::make('title'),
 
+            TextInput::make('nested.input'),
+
             TextInput::make('disabled')
                 ->disabled(),
 
@@ -105,10 +120,12 @@ class TestComponentWithMultipleForms extends Livewire
     {
         return [
             'fooForm' => $this->makeForm()
-                ->schema($this->getSchemaForForms()),
+                ->schema($this->getSchemaForForms())
+                ->statePath('data'),
 
             'barForm' => $this->makeForm()
-                ->schema($this->getSchemaForForms()),
+                ->schema($this->getSchemaForForms())
+                ->statePath('data'),
         ];
     }
 

@@ -27,6 +27,10 @@ class TestsPageActions
 
             $this->call('mountAction', $name);
 
+            if (filled($this->instance()->redirectTo)) {
+                return $this;
+            }
+
             $action = $this->instance()->getCachedAction($name);
 
             if (! $action->shouldOpenModal()) {
@@ -98,6 +102,10 @@ class TestsPageActions
 
             $this->call('callMountedAction', json_encode($arguments));
 
+            if (filled($this->instance()->redirectTo)) {
+                return $this;
+            }
+
             if ($this->get('mountedAction') !== $action->getName()) {
                 $this->assertDispatchedBrowserEvent('close-modal', [
                     'id' => 'page-action',
@@ -111,6 +119,8 @@ class TestsPageActions
     public function assertPageActionExists(): Closure
     {
         return function (string $name): static {
+            $name = $this->parseActionName($name);
+
             $livewire = $this->instance();
             $livewireClass = $livewire::class;
 
@@ -126,9 +136,45 @@ class TestsPageActions
         };
     }
 
+    public function assertPageActionDoesNotExist(): Closure
+    {
+        return function (string $name): static {
+            $name = $this->parseActionName($name);
+
+            $livewire = $this->instance();
+            $livewireClass = $livewire::class;
+
+            $action = $livewire->getCachedAction($name);
+
+            Assert::assertNull(
+                $action,
+                message: "Failed asserting that an action with name [{$name}] does not exist on the [{$livewireClass}] page.",
+            );
+
+            return $this;
+        };
+    }
+
+    public function assertPageActionsExistInOrder(): Closure
+    {
+        return function (array $names): static {
+            $livewire = $this->instance();
+            $this->assertActionListInOrder(
+                $names,
+                $livewire->getCachedActions(),
+                'page',
+                Action::class,
+            );
+
+            return $this;
+        };
+    }
+
     public function assertPageActionVisible(): Closure
     {
         return function (string $name): static {
+            $name = $this->parseActionName($name);
+
             /** @phpstan-ignore-next-line */
             $this->assertPageActionExists($name);
 
@@ -149,6 +195,8 @@ class TestsPageActions
     public function assertPageActionHidden(): Closure
     {
         return function (string $name): static {
+            $name = $this->parseActionName($name);
+
             /** @phpstan-ignore-next-line */
             $this->assertPageActionExists($name);
 
@@ -169,6 +217,8 @@ class TestsPageActions
     public function assertPageActionEnabled(): Closure
     {
         return function (string $name): static {
+            $name = $this->parseActionName($name);
+
             /** @phpstan-ignore-next-line */
             $this->assertPageActionExists($name);
 
@@ -189,6 +239,8 @@ class TestsPageActions
     public function assertPageActionDisabled(): Closure
     {
         return function (string $name): static {
+            $name = $this->parseActionName($name);
+
             /** @phpstan-ignore-next-line */
             $this->assertPageActionExists($name);
 
@@ -209,6 +261,8 @@ class TestsPageActions
     public function assertPageActionHasIcon(): Closure
     {
         return function (string $name, string $icon, $record = null): static {
+            $name = $this->parseActionName($name);
+
             /** @phpstan-ignore-next-line */
             $this->assertPageActionExists($name);
 
@@ -229,6 +283,8 @@ class TestsPageActions
     public function assertPageActionDoesNotHaveIcon(): Closure
     {
         return function (string $name, string $icon, $record = null): static {
+            $name = $this->parseActionName($name);
+
             /** @phpstan-ignore-next-line */
             $this->assertPageActionExists($name);
 
@@ -249,6 +305,8 @@ class TestsPageActions
     public function assertPageActionHasLabel(): Closure
     {
         return function (string $name, string $label, $record = null): static {
+            $name = $this->parseActionName($name);
+
             /** @phpstan-ignore-next-line */
             $this->assertPageActionExists($name);
 
@@ -269,6 +327,8 @@ class TestsPageActions
     public function assertPageActionDoesNotHaveLabel(): Closure
     {
         return function (string $name, string $label, $record = null): static {
+            $name = $this->parseActionName($name);
+
             /** @phpstan-ignore-next-line */
             $this->assertPageActionExists($name);
 
@@ -289,6 +349,8 @@ class TestsPageActions
     public function assertPageActionHasColor(): Closure
     {
         return function (string $name, string $color, $record = null): static {
+            $name = $this->parseActionName($name);
+
             /** @phpstan-ignore-next-line */
             $this->assertPageActionExists($name);
 
@@ -309,6 +371,8 @@ class TestsPageActions
     public function assertPageActionDoesNotHaveColor(): Closure
     {
         return function (string $name, string $color, $record = null): static {
+            $name = $this->parseActionName($name);
+
             /** @phpstan-ignore-next-line */
             $this->assertPageActionExists($name);
 
@@ -326,7 +390,95 @@ class TestsPageActions
         };
     }
 
-    public function assertPageActionHeld(): Closure
+    public function assertPageActionHasUrl(): Closure
+    {
+        return function (string $name, string $url, $record = null): static {
+            $name = $this->parseActionName($name);
+
+            /** @phpstan-ignore-next-line */
+            $this->assertPageActionExists($name);
+
+            $livewire = $this->instance();
+            $livewireClass = $livewire::class;
+
+            $action = $livewire->getCachedAction($name);
+
+            Assert::assertTrue(
+                $action->getUrl() === $url,
+                message: "Failed asserting that an action with name [{$name}] has URL [{$url}] on the [{$livewireClass}] component.",
+            );
+
+            return $this;
+        };
+    }
+
+    public function assertPageActionDoesNotHaveUrl(): Closure
+    {
+        return function (string $name, string $url, $record = null): static {
+            $name = $this->parseActionName($name);
+
+            /** @phpstan-ignore-next-line */
+            $this->assertPageActionExists($name);
+
+            $livewire = $this->instance();
+            $livewireClass = $livewire::class;
+
+            $action = $livewire->getCachedAction($name);
+
+            Assert::assertFalse(
+                $action->getUrl() === $url,
+                message: "Failed asserting that an action with name [{$name}] does not have URL [{$url}] on the [{$livewireClass}] component.",
+            );
+
+            return $this;
+        };
+    }
+
+    public function assertPageActionShouldOpenUrlInNewTab(): Closure
+    {
+        return function (string $name, $record = null): static {
+            $name = $this->parseActionName($name);
+
+            /** @phpstan-ignore-next-line */
+            $this->assertPageActionExists($name);
+
+            $livewire = $this->instance();
+            $livewireClass = $livewire::class;
+
+            $action = $livewire->getCachedAction($name);
+
+            Assert::assertTrue(
+                $action->shouldOpenUrlInNewTab(),
+                message: "Failed asserting that an action with name [{$name}] should open url in new tab on the [{$livewireClass}] component.",
+            );
+
+            return $this;
+        };
+    }
+
+    public function assertPageActionShouldNotOpenUrlInNewTab(): Closure
+    {
+        return function (string $name, $record = null): static {
+            $name = $this->parseActionName($name);
+
+            /** @phpstan-ignore-next-line */
+            $this->assertPageActionExists($name);
+
+            $livewire = $this->instance();
+            $livewireClass = $livewire::class;
+
+            $action = $livewire->getCachedAction($name);
+
+            Assert::assertFalse(
+                $action->shouldOpenUrlInNewTab(),
+                message: "Failed asserting that an action with name [{$name}] should not open url in new tab on the [{$livewireClass}] component.",
+            );
+
+            return $this;
+        };
+    }
+
+    public function assertPageActionHalted(): Closure
     {
         return function (string $name): static {
             $name = $this->parseActionName($name);
@@ -338,6 +490,14 @@ class TestsPageActions
 
             return $this;
         };
+    }
+
+    /**
+     * @deprecated Use `->assertPageActionHalted()` instead.
+     */
+    public function assertPageActionHeld(): Closure
+    {
+        return $this->assertPageActionHalted();
     }
 
     public function assertHasPageActionErrors(): Closure

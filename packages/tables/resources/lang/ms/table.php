@@ -8,9 +8,21 @@ return [
             'more' => 'dan :count lagi',
         ],
 
+        'messages' => [
+            'copied' => 'Disalin',
+        ],
+
     ],
 
     'fields' => [
+
+        'bulk_select_page' => [
+            'label' => 'Pilih/nyahpilih semua item untuk tindakan pukal.',
+        ],
+
+        'bulk_select_record' => [
+            'label' => 'Pilih/nyahpilih item :key untuk tindakan pukal.',
+        ],
 
         'search_query' => [
             'label' => 'Cari',
@@ -28,7 +40,13 @@ return [
         'fields' => [
 
             'records_per_page' => [
+
                 'label' => 'setiap halaman',
+
+                'options' => [
+                    'all' => 'Semua',
+                ],
+
             ],
 
         ],
@@ -76,7 +94,17 @@ return [
     ],
 
     'empty' => [
+
         'heading' => 'Tiada rekod dijumpai',
+
+        'buttons' => [
+
+            'reset_column_searches' => [
+                'label' => 'Kosongkan carian',
+            ],
+
+        ],
+
     ],
 
     'filters' => [
@@ -94,10 +122,6 @@ return [
 
             'reset' => [
                 'label' => 'Tetapkan semula penapis',
-            ],
-
-            'close' => [
-                'label' => 'Tutup',
             ],
 
         ],
@@ -140,6 +164,29 @@ return [
 
             'deselect_all' => [
                 'label' => 'Nyahpilih semua',
+            ],
+
+        ],
+
+    ],
+
+    'sorting' => [
+
+        'fields' => [
+
+            'column' => [
+                'label' => 'Disusun mengikut',
+            ],
+
+            'direction' => [
+
+                'label' => 'Arah susunan',
+
+                'options' => [
+                    'asc' => 'Menaik',
+                    'desc' => 'Menurun',
+                ],
+
             ],
 
         ],

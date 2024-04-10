@@ -40,6 +40,7 @@ export default (Alpine) => {
             imageResizeMode,
             imageResizeTargetHeight,
             imageResizeTargetWidth,
+            imageResizeUpscale,
             isAvatar,
             loadingIndicatorPosition,
             locale,
@@ -52,6 +53,7 @@ export default (Alpine) => {
             removeUploadedFileUsing,
             reorderUploadedFilesUsing,
             shouldAppendFiles,
+            shouldOrientImageFromExif,
             shouldTransformImage,
             state,
             uploadButtonPosition,
@@ -78,6 +80,7 @@ export default (Alpine) => {
                         acceptedFileTypes,
                         allowPaste: false,
                         allowReorder: canReorder,
+                        allowImageExifOrientation: shouldOrientImageFromExif,
                         allowImagePreview: canPreview,
                         allowVideoPreview: canPreview,
                         allowAudioPreview: canPreview,
@@ -89,6 +92,7 @@ export default (Alpine) => {
                         imageResizeTargetHeight,
                         imageResizeTargetWidth,
                         imageResizeMode,
+                        imageResizeUpscale,
                         itemInsertLocation: shouldAppendFiles
                             ? 'after'
                             : 'before',
@@ -105,7 +109,9 @@ export default (Alpine) => {
                             uploadProgressIndicatorPosition,
                         server: {
                             load: async (source, load) => {
-                                let response = await fetch(source)
+                                let response = await fetch(source, {
+                                    cache: 'no-store',
+                                })
                                 let blob = await response.blob()
 
                                 load(blob)
@@ -175,10 +181,13 @@ export default (Alpine) => {
 
                         // We don't want to overwrite the files that are already in the input, if they haven't been saved yet.
                         if (
+                            this.state !== null &&
                             Object.values(this.state).filter((file) =>
                                 file.startsWith('livewire-file:'),
                             ).length
                         ) {
+                            this.lastState = null
+
                             return
                         }
 
@@ -233,29 +242,41 @@ export default (Alpine) => {
                         this.insertOpenLink(fileItem)
                     })
 
-                    this.pond.on('processfilestart', async () => {
+                    this.pond.on('addfilestart', async (file) => {
+                        if (
+                            file.status !==
+                            FilePond.FileStatus.PROCESSING_QUEUED
+                        ) {
+                            return
+                        }
+
                         this.dispatchFormEvent('file-upload-started')
                     })
 
-                    this.pond.on('processfileprogress', async () => {
-                        this.dispatchFormEvent('file-upload-started')
-                    })
+                    const handleFileProcessing = async () => {
+                        if (
+                            this.pond
+                                .getFiles()
+                                .filter(
+                                    (file) =>
+                                        file.status ===
+                                            FilePond.FileStatus.PROCESSING ||
+                                        file.status ===
+                                            FilePond.FileStatus
+                                                .PROCESSING_QUEUED,
+                                ).length
+                        ) {
+                            return
+                        }
 
-                    this.pond.on('processfile', async () => {
                         this.dispatchFormEvent('file-upload-finished')
-                    })
+                    }
 
-                    this.pond.on('processfiles', async () => {
-                        this.dispatchFormEvent('file-upload-finished')
-                    })
+                    this.pond.on('processfile', handleFileProcessing)
 
-                    this.pond.on('processfileabort', async () => {
-                        this.dispatchFormEvent('file-upload-finished')
-                    })
+                    this.pond.on('processfileabort', handleFileProcessing)
 
-                    this.pond.on('processfilerevert', async () => {
-                        this.dispatchFormEvent('file-upload-finished')
-                    })
+                    this.pond.on('processfilerevert', handleFileProcessing)
                 },
 
                 dispatchFormEvent: function (name) {
@@ -381,6 +402,7 @@ import de from 'filepond/locale/de-de'
 import en from 'filepond/locale/en-en'
 import es from 'filepond/locale/es-es'
 import fa from 'filepond/locale/fa_ir'
+import fi from 'filepond/locale/fi-fi'
 import fr from 'filepond/locale/fr-fr'
 import hu from 'filepond/locale/hu-hu'
 import id from 'filepond/locale/id-id'
@@ -406,6 +428,7 @@ const locales = {
     en,
     es,
     fa,
+    fi,
     fr,
     hu,
     id,

@@ -3,14 +3,6 @@
 namespace Livewire\Testing {
 
     class TestableLivewire {
-        public function fillForm(array $state = []): static {}
-
-        public function assertFormSet(array $state): static {}
-
-        public function assertHasFormErrors(array $keys = []): static {}
-
-        public function assertHasNoFormErrors(array $keys = []): static {}
-
         public function mountPageAction(string $name): static {}
 
         public function setPageActionData(array $data): static {}
@@ -22,6 +14,10 @@ namespace Livewire\Testing {
         public function callMountedPageAction(array $arguments = []): static {}
 
         public function assertPageActionExists(string $name): static {}
+
+        public function assertPageActionDoesNotExist(string $name): static {}
+
+        public function assertPageActionsExistInOrder(array $names): static {}
 
         public function assertPageActionVisible(string $name): static {}
 
@@ -37,13 +33,21 @@ namespace Livewire\Testing {
 
         public function assertPageActionHasLabel(string $name, string $label): static {}
 
+        public function assertPageActionDoesNotHaveLabel(string $name, string $label): static {}
+
         public function assertPageActionHasColor(string $name, string $color): static {}
 
         public function assertPageActionDoesNotHaveColor(string $name, string $color): static {}
 
-        public function assertPageActionDoesNotHaveLabel(string $name, string $label): static {}
+        public function assertPageActionHasUrl(string $name, string $url): static {}
 
-        public function assertPageActionHeld(string $name): static {}
+        public function assertPageActionDoesNotHaveUrl(string $name, string $url): static {}
+
+        public function assertPageActionShouldOpenUrlInNewTab(string $name): static {}
+
+        public function assertPageActionShouldNotOpenUrlInNewTab(string $name): static {}
+
+        public function assertPageActionHalted(string $name): static {}
 
         public function assertHasPageActionErrors(array $keys = []): static {}
 

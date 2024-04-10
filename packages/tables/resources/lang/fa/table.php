@@ -2,7 +2,27 @@
 
 return [
 
+    'columns' => [
+
+        'tags' => [
+            'more' => 'و :count تا بیشتر',
+        ],
+
+        'messages' => [
+            'copied' => 'کپی شد',
+        ],
+
+    ],
+
     'fields' => [
+
+        'bulk_select_page' => [
+            'label' => 'انتخاب/عدم انتخاب تمامی موارد برای اقدامات گروهی',
+        ],
+
+        'bulk_select_record' => [
+            'label' => 'انتخاب/عدم انتخاب مورد :key برای اقدامات گروهی',
+        ],
 
         'search_query' => [
             'label' => 'جستجو',
@@ -20,7 +40,13 @@ return [
         'fields' => [
 
             'records_per_page' => [
+
                 'label' => 'در هر صفحه',
+
+                'options' => [
+                    'all' => 'همه',
+                ],
+
             ],
 
         ],
@@ -45,6 +71,14 @@ return [
 
     'buttons' => [
 
+        'disable_reordering' => [
+            'label' => 'اتمام بازچینش رکوردها',
+        ],
+
+        'enable_reordering' => [
+            'label' => 'بازچینش رکوردها',
+        ],
+
         'filter' => [
             'label' => 'فیلتر',
         ],
@@ -54,24 +88,43 @@ return [
         ],
 
         'toggle_columns' => [
-            'label' => 'باز/بستن ستون ها',
+            'label' => 'باز/بستن ستون‌ها',
         ],
 
     ],
 
     'empty' => [
         'heading' => 'هیچ رکوردی یافت نشد',
+
+        'buttons' => [
+
+            'reset_column_searches' => [
+                'label' => 'جستجوی ستونی را پاک کن',
+            ],
+
+        ],
     ],
 
     'filters' => [
 
         'buttons' => [
 
+            'remove' => [
+                'label' => 'حذف فیلتر',
+            ],
+
+            'remove_all' => [
+                'label' => 'حذف تمام فیلترها',
+                'tooltip' => 'حذف تمام فیلترها',
+            ],
+
             'reset' => [
-                'label' => 'حذف فیلترها',
+                'label' => 'بازنشانی فیلترها',
             ],
 
         ],
+
+        'indicator' => 'فیلترهای فعال',
 
         'multi_select' => [
             'placeholder' => 'همه',
@@ -83,13 +136,13 @@ return [
 
         'trashed' => [
 
-            'label' => 'رکوردهای حذف شده',
+            'label' => 'رکوردهای حذف‌شده',
 
-            'only_trashed' => 'فقط رکوردهای حذف شده',
+            'only_trashed' => 'فقط رکوردهای حذف‌شده',
 
-            'with_trashed' => 'به همراه رکوردهای حذف شده',
+            'with_trashed' => 'به همراه رکوردهای حذف‌شده',
 
-            'without_trashed' => 'بدون رکوردهای حذف شده',
+            'without_trashed' => 'بدون رکوردهای حذف‌شده',
 
         ],
 
@@ -109,6 +162,29 @@ return [
 
             'deselect_all' => [
                 'label' => 'عدم انتخاب',
+            ],
+
+        ],
+
+    ],
+
+    'sorting' => [
+
+        'fields' => [
+
+            'column' => [
+                'label' => 'مرتب‌سازی براساس',
+            ],
+
+            'direction' => [
+
+                'label' => 'جهت مرتب‌سازی',
+
+                'options' => [
+                    'asc' => 'صعودی',
+                    'desc' => 'نزولی',
+                ],
+
             ],
 
         ],
